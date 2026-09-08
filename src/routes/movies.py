@@ -33,10 +33,7 @@ async def get_movies(
 ):
     offset = (page - 1) * per_page
     result = await db.execute(
-        select(MovieModel)
-        .offset(offset)
-        .limit(per_page)
-        .order_by(MovieModel.id.desc())
+        select(MovieModel).offset(offset).limit(per_page).order_by(MovieModel.id.desc())
     )
     movies = result.scalars().all()
 
@@ -190,7 +187,7 @@ async def create_movie(movie: MovieCreate, db: AsyncSession = Depends(get_db)):
     return new_movie
 
 
-@router.get("/movies/{movie_id}/")
+@router.get("/movies/{movie_id}/", response_model=MovieDetailSchema)
 async def get_movie(movie_id: int, db: AsyncSession = Depends(get_db)):
     result = await db.execute(
         select(MovieModel)
@@ -251,6 +248,24 @@ async def update_movie(
         )
 
     update_data = movie_data.model_dump(exclude_unset=True)
+
+    if "score" in update_data and not 0 <= update_data["score"] <= 100:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid input data.",
+        )
+
+    if "budget" in update_data and update_data["budget"] < 0:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid input data.",
+        )
+
+    if "revenue" in update_data and update_data["revenue"] < 0:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid input data.",
+        )
 
     for field, value in update_data.items():
         if field == "status":

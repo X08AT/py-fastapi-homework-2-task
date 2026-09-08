@@ -84,8 +84,8 @@ class MovieDetailSchema(BaseModel):
 class MovieUpdate(BaseModel):
     name: str | None = Field(default=None, max_length=255)
     date: datetime.date | None = None
-    score: float | None = Field(default=None, ge=0, le=100)
+    score: float | None = None
     overview: str | None = None
     status: MovieStatus | None = None
-    budget: float | None = Field(default=None, ge=0)
-    revenue: float | None = Field(default=None, ge=0)
+    budget: float | None = None
+    revenue: float | None = None
